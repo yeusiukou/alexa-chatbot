@@ -170,7 +170,7 @@ function handleSessionEndRequest(callback) {
         ];
 
         for(var i=0;i<exitingCommands.length;i++)
-            if(questionValue===exitingCommands[i]){
+            if(questionValue.toLowerCase().includes(exitingCommands[i].toLowerCase())){
                 shouldEndSession=true;
                 break;
             }
