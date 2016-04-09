@@ -12,6 +12,20 @@
 
 var mitsuku=require("mitsuku-api")();
 
+var PROMPT = [
+    "Say it again",
+    "What did you say?",
+    "Sorry, I didn't get it",
+    "What is it you just said?"
+    ]
+var BYE = [
+    "Good bye",
+    "See you soon",
+    "Looking forward to talking with you",
+    "Bye. I will miss you",
+    "Ok, let's talk later"
+]
+
 function lambdaHandler(event, context) {
 try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
@@ -118,7 +132,7 @@ function getWelcomeResponse(callback) {
     var speechOutput = "Hi there! ";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "Could you repeat, please? I haven't understood you correctly.";
+    var repromptText = "Say it again";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
