@@ -1,12 +1,3 @@
-var bot = require('mitsuku-api')();
-
-function sayToBot(text) {
-    bot.send(text)
-    .then(function(response){
-        speakUp(response);
-    });
-}
-
 /**
  * This sample demonstrates a simple skill built with the Amazon Alexa Skills Kit.
  * The Intent Schema, Custom Slots, and Sample Utterances for this skill, as well as
@@ -18,8 +9,11 @@ function sayToBot(text) {
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
-exports.handler = function (event, context) {
-    try {
+
+var mitsuku=require("mitsuku-api")();
+
+function lambdaHandler(event, context) {
+try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
 
         /**
@@ -45,7 +39,6 @@ exports.handler = function (event, context) {
         } else if (event.request.type === "IntentRequest") {
             onIntent(event.request,
                 event.session,
-                
                 function callback(sessionAttributes, speechletResponse) {
                     context.succeed(buildResponse(sessionAttributes, speechletResponse));
                 });
@@ -56,7 +49,9 @@ exports.handler = function (event, context) {
     } catch (e) {
         context.fail("Exception: " + e);
     }
-};
+}
+
+exports.handler = lambdaHandler;
 
 /**
  * Called when the session starts.
@@ -83,27 +78,34 @@ function onLaunch(launchRequest, session, callback) {
 function onIntent(intentRequest, session, callback) {
     console.log("onIntent requestId=" + intentRequest.requestId +
         ", sessionId=" + session.sessionId);
-        var intent = intentRequest.intent;
-        var sessionAttributes = {};
-    var shouldEndSession = false;
-    var text = intent.slots.Text;
-    sayToBot(text);
 
     var intent = intentRequest.intent,
         intentName = intentRequest.intent.name;
 
     // Dispatch to your skill's intent handlers
-    // if ("MyColorIsIntent" === intentName) {
-        // setColorInSession(intent, session, callback);
-    // } else if ("WhatsMyColorIntent" === intentName) {
-    //     getColorFromSession(intent, session, callback);
-    // } else if ("AMAZON.HelpIntent" === intentName) {
-    //     getWelcomeResponse(callback);
-    // } else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
-    //     handleSessionEndRequest(callback);
-    // } else {
-    //     throw "Invalid intent";
-    // }
+    
+    
+    if("AskChatbot"===intentName){
+        askMitsuku(intent, session, callback);
+    }
+    else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
+        handleSessionEndRequest(callback);
+    }
+    else{
+        throw "Invalid intent";
+    }
+    /*
+    if ("MyColorIsIntent" === intentName) {
+        setColorInSession(intent, session, callback);
+    } else if ("WhatsMyColorIntent" === intentName) {
+        getColorFromSession(intent, session, callback);
+    } else if ("AMAZON.HelpIntent" === intentName) {
+        getWelcomeResponse(callback);
+    } else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
+        handleSessionEndRequest(callback);
+    } else {
+        throw "Invalid intent";
+    }*/
 }
 
 /**
@@ -119,32 +121,66 @@ function onSessionEnded(sessionEndedRequest, session) {
 // --------------- Functions that control the skill's behavior -----------------------
 
 function getWelcomeResponse(callback) {
-    sayToBot("I want to talk to you");
-}
-
-function speakUp(text, callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
-    var cardTitle = "Answer";
-    var speechOutput = text;
+    var cardTitle = "Welcome";
+    var speechOutput = "Hi there! ";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "What did you say?";
+    var repromptText = "Could you repeat, please? I haven't understood you correctly.";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
-
 function handleSessionEndRequest(callback) {
     var cardTitle = "Session Ended";
-    var speechOutput = "Thank you for trying the Alexa Skills Kit sample. Have a nice day!";
+    var speechOutput = "See you!";
     // Setting this to true ends the session and exits the skill.
     var shouldEndSession = true;
 
     callback({}, buildSpeechletResponse(cardTitle, speechOutput, null, shouldEndSession));
 }
+
+/**
+ * Sends user question to mitsuku and prepares the speech to reply answer to the user.
+ */
+ 
+ function askMitsuku(intent, session, callback) {
+    var cardTitle = intent.name;
+    var questionSlot = intent.slots.Question;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+
+    if (questionSlot) {
+        var questionValue = questionSlot.value;
+        sessionAttributes = {question: questionValue};
+        //speechOutput = "Your question was " + questionValue ;
+
+        mitsuku.send(questionValue)
+        .then(function(response){
+            speechOutput = response;
+            //console.log(response)
+            callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));    
+            });
+
+
+        repromptText = "Hello, I'm Mitsuku. ";
+    } else {
+        speechOutput = "I'm not sure what your favorite color is. Please try again";
+        repromptText = "I'm not sure what your favorite color is. You can tell me your " +
+            "favorite color by saying, my favorite color is red";
+    }
+
+    
+ }
+
+
+
 
 /**
  * Sets the color in the session and prepares the speech to reply to the user.
@@ -180,14 +216,14 @@ function createFavoriteColorAttributes(favoriteColor) {
 }
 
 function getColorFromSession(intent, session, callback) {
-    var favoriteColor;
+    var question;
     var repromptText = null;
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
 
     if (session.attributes) {
-        favoriteColor = session.attributes.favoriteColor;
+        question = session.attributes.question;
     }
 
     if (favoriteColor) {
