@@ -1,9 +1,11 @@
-  var m = require('mitsuku-api')();
+var bot = require('mitsuku-api')();
 
-    m.send('how are you?')
+function sayToBot(text) {
+    bot.send(text)
     .then(function(response){
-        console.log(response);
+        speakUp(response);
     });
+}
 
 /**
  * This sample demonstrates a simple skill built with the Amazon Alexa Skills Kit.
@@ -43,6 +45,7 @@ exports.handler = function (event, context) {
         } else if (event.request.type === "IntentRequest") {
             onIntent(event.request,
                 event.session,
+                
                 function callback(sessionAttributes, speechletResponse) {
                     context.succeed(buildResponse(sessionAttributes, speechletResponse));
                 });
@@ -80,22 +83,27 @@ function onLaunch(launchRequest, session, callback) {
 function onIntent(intentRequest, session, callback) {
     console.log("onIntent requestId=" + intentRequest.requestId +
         ", sessionId=" + session.sessionId);
+        var intent = intentRequest.intent;
+        var sessionAttributes = {};
+    var shouldEndSession = false;
+    var text = intent.slots.Text;
+    sayToBot(text);
 
     var intent = intentRequest.intent,
         intentName = intentRequest.intent.name;
 
     // Dispatch to your skill's intent handlers
-    if ("MyColorIsIntent" === intentName) {
-        setColorInSession(intent, session, callback);
-    } else if ("WhatsMyColorIntent" === intentName) {
-        getColorFromSession(intent, session, callback);
-    } else if ("AMAZON.HelpIntent" === intentName) {
-        getWelcomeResponse(callback);
-    } else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
-        handleSessionEndRequest(callback);
-    } else {
-        throw "Invalid intent";
-    }
+    // if ("MyColorIsIntent" === intentName) {
+        // setColorInSession(intent, session, callback);
+    // } else if ("WhatsMyColorIntent" === intentName) {
+    //     getColorFromSession(intent, session, callback);
+    // } else if ("AMAZON.HelpIntent" === intentName) {
+    //     getWelcomeResponse(callback);
+    // } else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
+    //     handleSessionEndRequest(callback);
+    // } else {
+    //     throw "Invalid intent";
+    // }
 }
 
 /**
@@ -111,20 +119,23 @@ function onSessionEnded(sessionEndedRequest, session) {
 // --------------- Functions that control the skill's behavior -----------------------
 
 function getWelcomeResponse(callback) {
+    sayToBot("I want to talk to you");
+}
+
+function speakUp(text, callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
-    var cardTitle = "Welcome";
-    var speechOutput = "Welcome to the Alexa Skills Kit sample. " +
-        "Please tell me your favorite color by saying, my favorite color is red";
+    var cardTitle = "Answer";
+    var speechOutput = text;
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "Please tell me your favorite color by saying, " +
-        "my favorite color is red";
+    var repromptText = "What did you say?";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
+
 
 function handleSessionEndRequest(callback) {
     var cardTitle = "Session Ended";
