@@ -98,7 +98,7 @@ function onIntent(intentRequest, session, callback) {
     else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
         handleSessionEndRequest(callback);
     }
-    else if ("Farewell"===intentName){
+    else if ("FarewellChatbot"===intentName){
         handleSessionEndRequest(callback);
     }
     else{
@@ -134,7 +134,14 @@ function getWelcomeResponse(callback) {
 
 function handleSessionEndRequest(callback) {
     var cardTitle = "Session Ended";
-    var speechOutput = "See you!";
+    var outputOptions = [
+        "See you",
+        "Good luck",
+        "Have a nice day"
+    ];
+
+    var speechOutput = outputOptions[Math.floor(Math.random()*outputOptions.length)];
+
     // Setting this to true ends the session and exits the skill.
     var shouldEndSession = true;
 
