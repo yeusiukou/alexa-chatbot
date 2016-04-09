@@ -127,7 +127,14 @@ function getWelcomeResponse(callback) {
 
 function handleSessionEndRequest(callback) {
     var cardTitle = "Session Ended";
-    var speechOutput = "See you!";
+    var outputOptions = [
+        "See you",
+        "Good luck",
+        "Have a nice day"
+    ];
+
+    var speechOutput = outputOptions[Math.floor(Math.random()*outputOptions.length)];
+
     // Setting this to true ends the session and exits the skill.
     var shouldEndSession = true;
 
