@@ -91,6 +91,9 @@ function onIntent(intentRequest, session, callback) {
     else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
         handleSessionEndRequest(callback);
     }
+    else if ("Farewell"===intentName){
+        handleSessionEndRequest(callback);
+    }
     else{
         throw "Invalid intent";
     }
