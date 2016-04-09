@@ -12,6 +12,13 @@
 
 var mitsuku=require("mitsuku-api")();
 
+var botIDS = [
+    63906,  //Cyber Ty - Neutral Human Zealot
+    24007,  //Bildgesmythe - Friendly Mythical Philosopher
+    29681,  //Brother Jerome - Friendly Robot Philosopher
+    137136  //Vocaloid Miku - Friendly Robot Friend
+]
+
 function lambdaHandler(event, context) {
 try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
