@@ -26,6 +26,13 @@ var BYE = [
     "Ok, let's talk later"
 ]
 
+var botIDS = [
+    63906,  //Cyber Ty - Neutral Human Zealot
+    24007,  //Bildgesmythe - Friendly Mythical Philosopher
+    29681,  //Brother Jerome - Friendly Robot Philosopher
+    137136  //Vocaloid Miku - Friendly Robot Friend
+]
+
 function lambdaHandler(event, context) {
 try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
@@ -105,7 +112,7 @@ function onIntent(intentRequest, session, callback) {
     else if ("AMAZON.StopIntent" === intentName || "AMAZON.CancelIntent" === intentName) {
         handleSessionEndRequest(callback);
     }
-    else if ("Farewell"===intentName){
+    else if ("FarewellChatbot"===intentName){
         handleSessionEndRequest(callback);
     }
     else{
@@ -141,7 +148,14 @@ function getWelcomeResponse(callback) {
 
 function handleSessionEndRequest(callback) {
     var cardTitle = "Session Ended";
-    var speechOutput = "See you!";
+    var outputOptions = [
+        "See you",
+        "Good luck",
+        "Have a nice day"
+    ];
+
+    var speechOutput = outputOptions[Math.floor(Math.random()*outputOptions.length)];
+
     // Setting this to true ends the session and exits the skill.
     var shouldEndSession = true;
 
