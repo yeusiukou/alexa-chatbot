@@ -179,6 +179,17 @@ function handleSessionEndRequest(callback) {
         sessionAttributes = {question: questionValue};
         //speechOutput = "Your question was " + questionValue ;
 
+        var exitingCommands = [
+            "bye", "goodbye", "farewell", "have to go"
+        ];
+
+        for(var i=0;i<exitingCommands.length;i++)
+            if(questionValue.toLowerCase().includes(exitingCommands[i].toLowerCase())){
+                shouldEndSession=true;
+                break;
+            }
+        
+
         mitsuku.send(questionValue)
         .then(function(response){
             speechOutput = response;
